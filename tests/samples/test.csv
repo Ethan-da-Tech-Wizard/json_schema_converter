@@ -1,0 +1,4 @@
+id,name,price,in_stock,category
+1,Widget A,19.99,true,Tools
+2,Gadget B,25.50,false,Electronics
+3,Thingamajig C,5.00,true,Misc

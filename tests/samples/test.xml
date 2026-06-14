@@ -1,0 +1,18 @@
+<root>
+    <company name="TechCorp" location="San Francisco">
+        <department id="101">
+            <name>Engineering</name>
+            <head>Jane Doe</head>
+            <employees>
+                <employee id="1">
+                    <name>Alice</name>
+                    <role>Lead Dev</role>
+                </employee>
+                <employee id="2">
+                    <name>Bob</name>
+                    <role>Junior Dev</role>
+                </employee>
+            </employees>
+        </department>
+    </company>
+</root>

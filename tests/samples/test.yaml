@@ -1,0 +1,16 @@
+server:
+  host: localhost
+  port: 8080
+  timeout: 30.5
+database:
+  enabled: true
+  adapter: postgresql
+  connections:
+    - name: primary
+      pool: 5
+    - name: replica
+      pool: 10
+features:
+  - logging
+  - monitoring
+  - auth

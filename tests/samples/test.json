@@ -1,0 +1,10 @@
+{
+    "name": "Test Data",
+    "version": 1.0,
+    "active": true,
+    "tags": ["testing", "initialization"],
+    "metadata": {
+        "author": "Gemini CLI",
+        "created_at": "2026-06-14"
+    }
+}

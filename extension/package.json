@@ -1,0 +1,41 @@
+{
+    "name": "json-schema-converter",
+    "displayName": "Universal JSON Schema Converter",
+    "description": "Generate a JSON Schema from any file (JSON, CSV, XML, YAML, XLSX) with a single click.",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.80.0"
+    },
+    "categories": [
+        "Other"
+    ],
+    "activationEvents": [],
+    "main": "./out/extension.js",
+    "contributes": {
+        "commands": [
+            {
+                "command": "json-schema-converter.generate",
+                "title": "Generate JSON Schema"
+            }
+        ],
+        "menus": {
+            "explorer/context": [
+                {
+                    "command": "json-schema-converter.generate",
+                    "when": "resourceExtname =~ /\\.(json|csv|xml|yaml|yml|xlsx)$/",
+                    "group": "navigation"
+                }
+            ]
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "npm run compile",
+        "compile": "tsc -p ./",
+        "watch": "tsc -watch -p ./"
+    },
+    "devDependencies": {
+        "@types/node": "18.x",
+        "@types/vscode": "^1.80.0",
+        "typescript": "^5.1.3"
+    }
+}
