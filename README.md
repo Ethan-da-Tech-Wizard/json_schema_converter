@@ -1,39 +1,36 @@
 # Universal JSON Schema Converter
 
-A professional-grade utility to generate valid JSON Schemas (Draft 7) from virtually any data format.
+Generate JSON Schema from JSON, CSV, XML, YAML, and spreadsheets through a Python engine and VS Code extension.
 
-## 🚀 Two Paths to Success
+**Status:** Developer tool  
+**Built with:** Python, TypeScript/JavaScript, VS Code
 
-This project provides two ways to generate schemas, sharing a robust Python inference engine.
+[Project guide](docs/PROJECT_GUIDE.md) · [Every file explained](docs/FILE_GUIDE.md) · [Licenses and dependencies](docs/LICENSE_REVIEW.md)
 
-### 1. VS Code Extension (Integrated)
-The most seamless way to work. 
-- **How to use:** Right-click any supported file (`.json`, `.csv`, `.xml`, `.yaml`, `.xlsx`) in the VS Code Explorer and select **"Generate JSON Schema"**.
-- **Result:** A `.schema.json` file is created and automatically opened for you.
+## Start here
 
-### 2. Standalone Script (Automation)
-Perfect for CI/CD pipelines or quick local usage.
-- **Usage:**
-  ```bash
-  source venv/bin/activate
-  python scripts/run.py <your_file_path>
-  ```
+- [scripts/run.py](scripts/run.py) — Standalone Execution Script (run.py). Rationale: This provides a zero-boilerplate entry point. It uses a registry-style lookup to find the correct parser based on file extension, w… Defines `main`.
+- [core/engine.py](core/engine.py) — Shared Core Engine with Type Safety and Robust Error Handling. Defines `InferenceError`, `SchemaEngine`.
+- [requirements.txt](requirements.txt) — Python dependency requirements and optional dependency groups; install with the project’s documented interpreter and environment.
 
-## 🛠 Supported Formats
-- **JSON:** Native support.
-- **CSV:** Tabular normalization via Pandas.
-- **XML:** Hierarchical mapping (including attributes) via `xmltodict`.
-- **YAML/YML:** Configuration-style support.
-- **Excel (.xlsx):** Multi-row spreadsheet support.
+[Detailed setup, usage, and development notes](PROJECT_NOTES.md) preserve the previous project documentation.
 
-## 🧠 Architectural Philosophy
-Designed by a senior engineering mindset, this project uses a **Registry-Based Parser Pattern**. 
-- **Shared Core:** All interfaces call the same Python `core/engine.py`.
-- **Decoupled Parsers:** Adding a new format requires zero changes to the inference engine.
-- **Audit Trail:** Every technical decision and its rationale is documented in `LOG.md`.
+## Repository layout
 
-## 📦 Installation
-1. Clone the repository.
-2. Run `python3 -m venv venv`.
-3. Run `source venv/bin/activate`.
-4. Run `pip install -r requirements.txt`.
+| Path | Role |
+| --- | --- |
+| [.github/](.github/) | GitHub workflow and contributor configuration (1 tracked entries). |
+| [core/](core/) | Shared domain logic and processing (9 tracked entries). |
+| [docs/](docs/) | Project documentation, decisions, and reference material (5 tracked entries). |
+| [documents/](documents/) | Project-specific documents components (9 tracked entries). |
+| [extension/](extension/) | Project-specific extension components (5 tracked entries). |
+| [scripts/](scripts/) | Build, launch, maintenance, and verification commands (1 tracked entries). |
+| [tests/](tests/) | Automated checks and test fixtures (10 tracked entries). |
+
+## Scope and current limits
+
+Python parsers and the editor extension share the schema-inference engine. Install the declared Python requirements before using the CLI.
+
+## License
+
+Original project code retains **MIT** terms in [LICENSE](LICENSE). Third-party libraries, media, data, models, and tools retain their own terms. See the [license review](docs/LICENSE_REVIEW.md) and [dependency inventory](docs/DEPENDENCIES.csv).
