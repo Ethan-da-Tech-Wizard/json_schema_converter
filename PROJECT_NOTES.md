@@ -27,7 +27,7 @@ Perfect for CI/CD pipelines or quick local usage.
 - **Excel (.xlsx):** Multi-row spreadsheet support.
 
 ## 🧠 Architectural Philosophy
-Designed by a senior engineering mindset, this project uses a **Registry-Based Parser Pattern**. 
+This project uses a **Registry-Based Parser Pattern**. 
 - **Shared Core:** All interfaces call the same Python `core/engine.py`.
 - **Decoupled Parsers:** Adding a new format requires zero changes to the inference engine.
 - **Audit Trail:** Every technical decision and its rationale is documented in `LOG.md`.
@@ -37,3 +37,4 @@ Designed by a senior engineering mindset, this project uses a **Registry-Based P
 2. Run `python3 -m venv venv`.
 3. Run `source venv/bin/activate`.
 4. Run `pip install -r requirements.txt`.
+
