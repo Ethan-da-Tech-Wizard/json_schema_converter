@@ -1,63 +1,54 @@
-"""
-Standalone Execution Script (run.py).
-Rationale: This provides a zero-boilerplate entry point. It uses a registry-style 
-lookup to find the correct parser based on file extension, which is the most 
-intuitive UX for a tool like this.
-"""
-# This line imports sys to handle system-level parameters and paths
+# ==============================================================================
+# Program: run.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Standalone CLI entry point for Universal JSON Schema Converter.
+#          Dispatches files or directories to appropriate format parsers via
+#          an extension registry, supports single-file conversion as well as
+#          batch aggregation into a master unified schema, and exposes CLI
+#          flags for strict requirement rules and size limits.
+# ==============================================================================
+
 import sys
-# This line imports os to interact with the operating system (like paths)
 import os
-# This line imports argparse to handle complex command line options
 import argparse
-# This line imports Path to handle file paths in a cross-platform way
 from pathlib import Path
 
-# This line adds the folder above 'scripts' to Python's search path so we can import the 'core' folder
+# Add project root directory to sys.path to enable core imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-# These lines import the core schema engine and all the specialized parsers we built
 from core.engine import SchemaEngine
 from core.parsers.json_parser import JSONParser
 from core.parsers.csv_parser import CSVParser
 from core.parsers.xml_parser import XMLParser
 from core.parsers.yaml_parser import YAMLParser
 from core.parsers.excel_parser import ExcelParser
-# This line imports the SecurityError we defined in the base parser
 from core.parsers.base import SecurityError
 
-# This is the main function that runs when you execute the script
 def main():
-    # This line creates a parser to handle command line arguments
+    """
+    Main CLI routine for parsing command-line flags and executing schema conversion.
+    """
+    # Step 1: Initialize argument parser and define CLI interface
     parser = argparse.ArgumentParser(description="Universal JSON Schema Converter")
-    
-    # This line adds the required argument: the path to the input file OR directory
     parser.add_argument("input", help="Path to the file or directory you want to convert")
-    
-    # This line adds an optional argument to override the 1GB safety limit
-    # Rationale: Setting this to 0 disables the check entirely (Unlimited Mode)
     parser.add_argument("--max-size", type=int, default=1024, help="Maximum file size in MB (default: 1024, use 0 for unlimited)")
-    
-    # This line adds the "Strict" toggle to force all fields to be required
     parser.add_argument("--strict", action="store_true", help="Force all fields to be 'required' in the schema")
     
-    # This line actually parses the arguments provided by the user in the terminal
+    # Step 2: Parse command-line arguments
     args = parser.parse_args()
-
-    # This line captures the input path from the arguments
     input_path = args.input
-    # This line converts the user-provided MB limit into bytes
     max_bytes = args.max_size * 1024 * 1024
     
-    # This block checks if the input actually exists
+    # Step 3: Validate input path existence
     if not os.path.exists(input_path):
         print(f"Error: Path not found at '{input_path}'")
         sys.exit(1)
 
-    # This line prepares our Schema Engine with the user's "Strict" preference
+    # Step 4: Instantiate schema engine with configured strictness
     engine = SchemaEngine(strict=args.strict)
     
-    # This is the "Registry" - it maps file extensions to the correct parser tool
+    # Step 5: Configure parser registry mapped by file extension
     parsers = {
         '.json': JSONParser(max_file_size=max_bytes),
         '.csv': CSVParser(max_file_size=max_bytes),
@@ -67,30 +58,25 @@ def main():
         '.xlsx': ExcelParser(max_file_size=max_bytes),
     }
 
-    # This block handles BATCH MERGING if a directory was provided
+    # Step 6: Handle batch directory processing or single-file processing
     if os.path.isdir(input_path):
         print(f"Batch Mode: Searching for files in {input_path}...")
-        # This line gets all files in the folder
         files = [os.path.join(input_path, f) for f in os.listdir(input_path) if os.path.isfile(os.path.join(input_path, f))]
         processed_count = 0
         
-        # This loop goes through every file found in the folder
+        # Iterate over directory contents and aggregate schema data
         for file in files:
             ext = Path(file).suffix.lower()
-            # If we have a parser for this file, we add its data to our "Master Schema"
             if ext in parsers:
                 try:
-                    # 1. Parse the file
                     data = parsers[ext].parse(file)
-                    # 2. Add the data to our engine (this builds the merged schema)
                     engine.add_data(data)
                     processed_count += 1
                 except Exception as e:
                     print(f"Warning: Skipping {file} due to error: {e}")
         
-        # This block checks if we actually found anything to merge
+        # Save aggregated master schema if files were processed
         if processed_count > 0:
-            # This line saves the final Master Schema
             output_path = os.path.join(input_path, "master_schema.json")
             engine.save_schema(engine.get_schema(), output_path)
             print(f"Success! Master Schema created for {processed_count} files at: {output_path}")
@@ -98,21 +84,18 @@ def main():
             print("Error: No supported files found in the directory.")
             sys.exit(1)
 
-    # This block handles SINGLE FILE conversion (the original mode)
     else:
+        # Single-file conversion mode
         ext = Path(input_path).suffix.lower()
         if ext not in parsers:
             print(f"Error: Unsupported file format '{ext}'")
             sys.exit(1)
 
         try:
-            # 1. Select the correct parser
+            # Parse target file, feed data into engine, and output schema
             active_parser = parsers[ext]
-            # 2. Parse the data
             data = active_parser.parse(input_path)
-            # 3. Add data to the engine
             engine.add_data(data)
-            # 4. Save the schema
             output_path = f"{input_path}.schema.json"
             engine.save_schema(engine.get_schema(), output_path)
             print(f"Success! Schema created at: {output_path}")
@@ -123,6 +106,5 @@ def main():
             print(f"Critical Error: {e}")
             sys.exit(1)
 
-# This line tells Python to run the main() function if this script is executed directly
 if __name__ == "__main__":
     main()

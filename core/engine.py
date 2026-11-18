@@ -1,120 +1,141 @@
-"""
-Shared Core Engine with Type Safety and Robust Error Handling.
-"""
-# This line imports standard libraries for JSON, Regex, and Logging
+# ==============================================================================
+# Program: engine.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Shared Core Schema Engine with type safety and robust error handling.
+#          Accepts parsed tabular, document, or key-value data structures (single
+#          objects or batches), applies pattern detection, builds cumulative
+#          JSON schemas via GenSON, and applies optional strictness constraints
+#          forcing required field rules across nested properties.
+# ==============================================================================
+
 import json
 import re
 import logging
-# This line imports type hints for professional coding standards
 from typing import Any, Dict, List, Union, Optional
-# This line imports the SchemaBuilder from GenSON
 from genson import SchemaBuilder
 
-# This line configures the logger for this file
+# Configure module-level logger for schema inference diagnostics
 logger = logging.getLogger(__name__)
 
-# This line defines a custom error for failures that happen during schema inference
 class InferenceError(Exception):
-    # This line allows the error to carry a message
+    """Custom exception raised when schema inference or serialization fails."""
     pass
 
-# This line defines the main class that coordinates schema generation
 class SchemaEngine:
-    # This method runs when a new SchemaEngine is created
-    # Rationale: Using Type Hints (strict: bool) makes the code self-documenting for other devs
+    """
+    Coordinates JSON schema inference across single or batch payloads.
+    Wraps GenSON SchemaBuilder with domain-specific enhancements such as
+    strictness constraints and robust serialization.
+    """
     def __init__(self, strict: bool = False):
-        # This line creates a new instance of the SchemaBuilder
+        """
+        Initialize the schema inference engine.
+        
+        Args:
+            strict (bool): When True, forces all discovered properties to be
+                           marked as required in the generated schema.
+        """
+        # Step 1: Initialize underlying GenSON builder instance
         self.builder = SchemaBuilder()
-        # This line stores the strictness setting
+        # Step 2: Store strictness flag governing required field enforcement
         self.strict = strict
-        # This line logs the initialization
         logger.info(f"SchemaEngine initialized (Strict: {strict})")
 
-    # This method takes data and adds it to the builder for learning
     def add_data(self, data: Union[Dict[str, Any], List[Dict[str, Any]]]) -> None:
         """
-        Feeds data into the builder. Supports lists (batch) or single objects.
+        Feeds parsed input data into the builder. Accepts either a single
+        dictionary or a batch list of dictionaries.
+        
+        Args:
+            data (Union[Dict, List[Dict]]): Parsed data payload to ingest.
         """
         try:
-            # This block checks if we received a list of data items
+            # Step 1: Check whether payload is a batch (list) or single object (dict)
             if isinstance(data, list):
-                # This line logs the batch size
                 logger.debug(f"Adding batch of {len(data)} items to engine")
-                # This loop processes every item in the batch
+                # Step 2: Ingest each batch element sequentially into the builder
                 for item in data:
-                    # This line applies smart pattern detection and adds the object
                     self.builder.add_object(self._apply_smart_patterns(item))
             else:
-                # This line logs that we are adding a single object
                 logger.debug("Adding single object to engine")
-                # This line applies patterns and adds the object
+                # Step 3: Ingest single object with pattern transformations
                 self.builder.add_object(self._apply_smart_patterns(data))
         except Exception as e:
-            # This line catches errors and wraps them in our custom InferenceError
+            # Wrap standard exceptions in domain-specific InferenceError
             raise InferenceError(f"Error while feeding data to engine: {str(e)}")
 
-    # This internal method looks for dates and emails to make the schema smarter
     def _apply_smart_patterns(self, data: Any) -> Any:
-        # This block checks if we are looking at a dictionary
+        """
+        Recursively traverses data structures to prepare objects for schema analysis.
+        
+        Args:
+            data (Any): Arbitrary object, dictionary, or list.
+            
+        Returns:
+            Any: Processed data structure.
+        """
+        # Step 1: Handle dictionary structures recursively
         if isinstance(data, dict):
-            # This loop recursively processes every key and value
             for key, value in data.items():
                 data[key] = self._apply_smart_patterns(value)
-        # This block checks if we are looking at a list
+        # Step 2: Handle list structures recursively
         elif isinstance(data, list):
-            # This line applies patterns to every item in the list
             return [self._apply_smart_patterns(i) for i in data]
         return data
 
-    # This method produces the final JSON Schema
     def get_schema(self) -> Dict[str, Any]:
         """
-        Returns the final generated JSON Schema.
+        Generates and returns the compiled JSON Schema.
+        
+        Returns:
+            Dict[str, Any]: Standard JSON Schema dictionary.
         """
         try:
-            # This line generates the raw schema from the builder
+            # Step 1: Compile current accumulated state into raw JSON schema
             logger.info("Generating final JSON Schema")
             schema = self.builder.to_schema()
             
-            # This block applies strict requirement constraints if requested
+            # Step 2: Enforce strict constraints if configured
             if self.strict:
                 logger.debug("Applying strict requirement constraints")
                 self._make_required(schema)
                 
-            # This line returns the finished schema
             return schema
         except Exception as e:
-            # This line catches errors and reports them via InferenceError
             raise InferenceError(f"Failed to generate schema: {str(e)}")
 
-    # This recursive method forces every property to be 'required'
     def _make_required(self, schema: Dict[str, Any]) -> None:
-        # This block checks if we are looking at an object type with properties
+        """
+        Recursively alters schema nodes so that all defined properties
+        are listed under the 'required' attribute.
+        
+        Args:
+            schema (Dict[str, Any]): Schema node to mutate in-place.
+        """
+        # Step 1: Handle object nodes containing defined properties
         if schema.get('type') == 'object' and 'properties' in schema:
-            # This line sets the 'required' list to be all existing property names
             schema['required'] = list(schema['properties'].keys())
-            # This loop goes deeper into nested objects
             for prop in schema['properties'].values():
                 self._make_required(prop)
-        # This block checks if we are looking at an array type
+        # Step 2: Handle array nodes containing nested items schema
         elif schema.get('type') == 'array' and 'items' in schema:
-            # This line recursively makes items in the array strict
             self._make_required(schema['items'])
 
-    # This method saves the generated schema to a file
     def save_schema(self, schema: Dict[str, Any], output_path: str) -> None:
         """
-        Writes the schema to a file with pretty-printing.
+        Serializes and writes the JSON Schema to a designated filesystem path.
+        
+        Args:
+            schema (Dict[str, Any]): The generated JSON Schema.
+            output_path (str): Target destination file path.
         """
         try:
-            # This line opens the file in write mode
+            # Write pretty-printed JSON schema with 4-space indentation
             with open(output_path, 'w') as f:
-                # This line saves the schema as pretty-printed JSON
                 json.dump(schema, f, indent=4)
-            # This line logs a success message
             logger.info(f"Schema successfully saved to {output_path}")
         except Exception as e:
-            # This line logs and raises a custom error if saving fails
             error_msg = f"Failed to save schema to {output_path}: {str(e)}"
             logger.error(error_msg)
             raise InferenceError(error_msg)

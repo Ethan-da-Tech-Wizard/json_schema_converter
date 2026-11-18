@@ -1,48 +1,56 @@
-"""
-CSV Parser Implementation with Memory Optimization.
-Rationale: For massive CSVs, we use chunking to avoid loading the entire file into RAM at once.
-This is a "Senior-Tier" optimization for high-performance data engineering.
-"""
-# This line imports pandas to handle the spreadsheet data
+# ==============================================================================
+# Program: csv_parser.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Specialized CSV parser implementing memory-efficient chunked reading.
+#          Processes structured tabular CSV data via pandas in batched chunks,
+#          normalizing rows into a list of record dictionaries for consumption
+#          by the schema inference engine without exhausting system memory.
+# ==============================================================================
+
 import pandas as pd
-# This line imports the BaseParser and ParsingError for consistency and error handling
 from .base import BaseParser, ParsingError
-# This line imports type hints for professional code standards
 from typing import List, Dict, Any
 
-# This line defines the CSVParser class
 class CSVParser(BaseParser):
-    
-    # This method allows setting a custom file size limit
+    """
+    Parses comma-separated value (CSV) files with chunked streaming
+    for memory optimization on large datasets.
+    """
     def __init__(self, max_file_size: int = None):
-        # This line calls the parent constructor
+        """
+        Initialize the CSV parser with an optional file size constraint.
+        
+        Args:
+            max_file_size (int, optional): Maximum size threshold in bytes.
+        """
         super().__init__(max_file_size)
 
-    # This method reads a CSV file and turns it into a list of dictionaries
     def parse(self, file_path: str) -> List[Dict[str, Any]]:
         """
-        Reads a CSV and converts it to a list of dictionaries.
-        Uses chunking to stay memory-efficient for large files.
+        Reads a CSV file and converts records into a list of dictionaries.
+        Leverages chunking (10,000 rows/chunk) to prevent memory exhaustion.
+        
+        Args:
+            file_path (str): Filesystem path to the CSV file.
+            
+        Returns:
+            List[Dict[str, Any]]: Normalized record dictionaries.
         """
-        # This line runs our security size check
+        # Step 1: Validate file size within safety limits
         self.validate_file(file_path)
 
         try:
-            # This line prepares to read the CSV in chunks of 10,000 rows at a time
-            # Rationale: This prevents the computer from freezing if the file is 1GB+
+            # Step 2: Initialize chunked iterator to process rows incrementally
             reader = pd.read_csv(file_path, chunksize=10000)
             
-            # This line creates an empty list to store our final data
+            # Step 3: Stream and accumulate normalized records
             normalized_data = []
-            
-            # This loop processes the file one chunk at a time
             for chunk in reader:
-                # This line converts each chunk into dictionaries and adds them to our list
                 normalized_data.extend(chunk.to_dict(orient='records'))
                 
-            # This line returns the complete normalized list
             return normalized_data
 
         except Exception as e:
-            # This line catches errors like bad formatting and raises our custom ParsingError
+            # Raise domain-specific ParsingError with contextual details
             raise ParsingError(f"Failed to parse CSV file: {str(e)}")

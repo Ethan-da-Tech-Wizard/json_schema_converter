@@ -1,35 +1,45 @@
-"""
-Enterprise-grade unit tests for the SchemaEngine.
-Rationale: Automated testing ensures that future changes don't break existing features.
-"""
-# This line imports the pytest library for running tests
+# ==============================================================================
+# Program: test_engine.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Unit tests for SchemaEngine inference functionality.
+#          Tests basic property inference, JSON schema structure compliance,
+#          and strict mode required field enforcement.
+# ==============================================================================
+
 import pytest
-# This line imports our SchemaEngine for testing
 from core.engine import SchemaEngine
 
-# This test verifies that the engine correctly identifies a basic object
 def test_basic_inference():
-    # This line sets up the engine
+    """
+    Verifies that the engine correctly infers JSON schema properties and types
+    from basic dictionary input.
+    """
+    # Step 1: Initialize schema engine in standard mode
     engine = SchemaEngine()
-    # This line provides sample data
-    data = {"id": 1, "name": "Test"}
-    # This line adds the data
-    engine.add_data(data)
-    # This line gets the resulting schema
-    schema = engine.get_schema()
     
-    # These lines "Assert" (verify) that the schema is correct
+    # Step 2: Feed sample data dictionary
+    data = {"id": 1, "name": "Test"}
+    engine.add_data(data)
+    
+    # Step 3: Retrieve and validate generated schema
+    schema = engine.get_schema()
     assert schema['type'] == 'object'
     assert 'id' in schema['properties']
     assert 'name' in schema['properties']
 
-# This test verifies that 'Strict Mode' correctly forces fields to be required
 def test_strict_mode():
-    # This line sets up the engine in strict mode
+    """
+    Verifies that enabling strict mode properly marks all discovered properties
+    in the schema as required.
+    """
+    # Step 1: Initialize schema engine with strict=True
     engine = SchemaEngine(strict=True)
+    
+    # Step 2: Feed test object
     data = {"id": 1}
     engine.add_data(data)
-    schema = engine.get_schema()
     
-    # This line verifies that 'id' is in the 'required' list
+    # Step 3: Verify required property list
+    schema = engine.get_schema()
     assert 'id' in schema['required']

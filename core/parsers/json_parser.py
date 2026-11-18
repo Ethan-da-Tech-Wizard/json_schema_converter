@@ -1,31 +1,42 @@
-"""
-JSON Parser Implementation.
-Rationale: While JSON is already "structured," we pass it through a parser to ensure 
-it is valid before it hits the inference engine. This maintains a consistent 
-pipeline where ALL data (CSV, XML, etc.) is treated as a generic Python structure.
-"""
-# This line imports the standard JSON library to read .json files
+# ==============================================================================
+# Program: json_parser.py
+# Programmer: Ethan-da-Tech-Wizard
+# Last Modified: November 18, 2026
+# Purpose: Specialized JSON parser implementing BaseParser interface.
+#          Validates file boundaries and parses valid JSON into native Python
+#          dictionaries or lists for the schema inference engine pipeline.
+# ==============================================================================
+
 import json
-# This line imports the BaseParser class we defined earlier so we can follow its rules
 from .base import BaseParser
 
-# This line defines the JSONParser class which specializes in reading JSON data
 class JSONParser(BaseParser):
-    
-    # This line allows the JSONParser to accept a custom file size limit
-    def __init__(self, max_file_size=None):
-        # This line calls the parent (BaseParser) constructor to set the limit
+    """
+    Parses JSON data files into native Python objects while enforcing
+    security bounds.
+    """
+    def __init__(self, max_file_size: int = None):
+        """
+        Initialize the JSON parser with an optional file size constraint.
+        
+        Args:
+            max_file_size (int, optional): Maximum size threshold in bytes.
+        """
         super().__init__(max_file_size)
 
-    # This method takes a file path and turns its content into a Python object
     def parse(self, file_path: str):
         """
-        Loads a JSON file and returns the native Python representation.
+        Loads and parses a JSON file into native Python representations.
+        
+        Args:
+            file_path (str): Filesystem path to target JSON file.
+            
+        Returns:
+            Union[Dict, List]: Deserialized JSON structure.
         """
-        # This line runs our security check to make sure the file isn't too large
+        # Step 1: Enforce file size security bounds
         self.validate_file(file_path)
 
-        # This line opens the file at 'file_path' in 'r' (read) mode
-        with open(file_path, 'r') as f:
-            # This line reads the text in the file and converts it into a Python dictionary or list
+        # Step 2: Open target file and deserialize JSON content
+        with open(file_path, 'r', encoding='utf-8') as f:
             return json.load(f)
