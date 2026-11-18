@@ -1,3 +1,8 @@
+# Program: json_schema_converter - base.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Defines the BaseParser abstract class plus the SecurityError and ParsingError exceptions that every file-format parser builds on.
+
 """
 Base Parser Class for the Universal JSON Schema Converter.
 Rationale: Every file format (CSV, XML, etc.) needs to be normalized into a standard Python object 
@@ -12,27 +17,32 @@ from typing import List, Any, Union, Dict
 
 # This line defines a custom error for security-related failures
 class SecurityError(Exception):
+    """Raised when a file breaks a safety rule, such as being larger than the size limit."""
     # This line allows the error to carry a message
     pass
 
 # This line defines a custom error for failures that happen during file reading
 class ParsingError(Exception):
+    """Raised when a file cannot be read or understood by a parser."""
     # This line allows the error to carry a message
     pass
 
 # This line defines a new class called BaseParser that inherits from ABC (Abstract Base Class)
 class BaseParser(ABC):
+    """Abstract parent for all parsers: provides the shared size check and requires a parse() method."""
     
     # This line sets the default safety limit for file sizes to 1GB (1024MB)
     DEFAULT_MAX_SIZE: int = 1024 * 1024 * 1024 # 1 Gigabyte in bytes
 
     # This method runs when a new parser is created
     def __init__(self, max_file_size: int = None):
+        """Store the max allowed file size in bytes (None means use the 1GB default; 0 means no limit)."""
         # This line sets the specific limit for this parser instance, or uses the default
         self.max_file_size = max_file_size if max_file_size is not None else self.DEFAULT_MAX_SIZE
 
     # This method checks if a file is safe to open based on its size
     def validate_file(self, file_path: str) -> None:
+        """Raise SecurityError if the file at file_path is larger than the size limit."""
         # This block checks if the safety limit is disabled (set to 0)
         if self.max_file_size == 0:
             # This line skips the check entirely and returns early

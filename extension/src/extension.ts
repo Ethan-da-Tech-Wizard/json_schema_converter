@@ -1,3 +1,9 @@
+// Program: json_schema_converter - extension.ts
+// Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+// Last Modified: 2026-11-18
+// Purpose: VS Code extension that adds a right-click command running the Python converter on the chosen file and opening the generated schema.
+
+// === Imports ===
 import * as vscode from 'vscode';
 // This line imports spawn from child_process for safer background execution than exec
 import { spawn } from 'child_process';
@@ -11,6 +17,7 @@ import * as path from 'path';
 // This function runs when the VS Code extension is activated
 export function activate(context: vscode.ExtensionContext) {
     // This line registers a new command that can be triggered from the context menu
+    // The command id below should match the one declared in the extension manifest; uri is the file that was right-clicked.
     let disposable = vscode.commands.registerCommand('json-schema-converter.generate', async (uri: vscode.Uri) => {
         // This block checks if the user actually right-clicked a file
         if (!uri) {
@@ -94,4 +101,5 @@ export function activate(context: vscode.ExtensionContext) {
 }
 
 // This function runs if the extension is disabled
+// Nothing to clean up here; VS Code disposes of context.subscriptions on its own.
 export function deactivate() {}

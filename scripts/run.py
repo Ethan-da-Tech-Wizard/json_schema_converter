@@ -1,3 +1,8 @@
+# Program: json_schema_converter - run.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Command-line entry point that picks a parser by file extension, builds a JSON Schema from one file or a whole folder, and saves it.
+
 """
 Standalone Execution Script (run.py).
 Rationale: This provides a zero-boilerplate entry point. It uses a registry-style 
@@ -28,6 +33,7 @@ from core.parsers.base import SecurityError
 
 # This is the main function that runs when you execute the script
 def main():
+    """Read command-line arguments, parse the input file or folder, and write the resulting JSON Schema."""
     # This line creates a parser to handle command line arguments
     parser = argparse.ArgumentParser(description="Universal JSON Schema Converter")
     
@@ -68,6 +74,7 @@ def main():
     }
 
     # This block handles BATCH MERGING if a directory was provided
+    # Folder input: merge every supported file into one master schema.
     if os.path.isdir(input_path):
         print(f"Batch Mode: Searching for files in {input_path}...")
         # This line gets all files in the folder
@@ -76,6 +83,7 @@ def main():
         
         # This loop goes through every file found in the folder
         for file in files:
+            # Get the lowercase file extension (for example ".csv") to look up its parser.
             ext = Path(file).suffix.lower()
             # If we have a parser for this file, we add its data to our "Master Schema"
             if ext in parsers:
@@ -100,6 +108,7 @@ def main():
 
     # This block handles SINGLE FILE conversion (the original mode)
     else:
+        # Get the lowercase extension of the single input file.
         ext = Path(input_path).suffix.lower()
         if ext not in parsers:
             print(f"Error: Unsupported file format '{ext}'")

@@ -1,3 +1,8 @@
+# Program: json_schema_converter - csv_parser.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Defines CSVParser, which reads a CSV file in chunks with pandas and returns its rows as a list of dictionaries.
+
 """
 CSV Parser Implementation with Memory Optimization.
 Rationale: For massive CSVs, we use chunking to avoid loading the entire file into RAM at once.
@@ -12,9 +17,11 @@ from typing import List, Dict, Any
 
 # This line defines the CSVParser class
 class CSVParser(BaseParser):
+    """Parser for .csv files using pandas chunked reading to limit memory use."""
     
     # This method allows setting a custom file size limit
     def __init__(self, max_file_size: int = None):
+        """Pass the optional file size limit up to BaseParser."""
         # This line calls the parent constructor
         super().__init__(max_file_size)
 

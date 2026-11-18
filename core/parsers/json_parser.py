@@ -1,3 +1,8 @@
+# Program: json_schema_converter - json_parser.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Defines JSONParser, which loads a .json file into a Python dict or list after the size check.
+
 """
 JSON Parser Implementation.
 Rationale: While JSON is already "structured," we pass it through a parser to ensure 
@@ -11,9 +16,11 @@ from .base import BaseParser
 
 # This line defines the JSONParser class which specializes in reading JSON data
 class JSONParser(BaseParser):
+    """Parser for .json files."""
     
     # This line allows the JSONParser to accept a custom file size limit
     def __init__(self, max_file_size=None):
+        """Pass the optional file size limit up to BaseParser."""
         # This line calls the parent (BaseParser) constructor to set the limit
         super().__init__(max_file_size)
 

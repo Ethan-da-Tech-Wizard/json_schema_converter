@@ -1,3 +1,8 @@
+# Program: json_schema_converter - xml_parser.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Defines XMLParser, which converts an XML file into a Python dictionary with xmltodict after the size check.
+
 """
 XML Parser Implementation.
 Rationale: XML is a tree-based format. To infer a JSON Schema, we must first 
@@ -12,9 +17,11 @@ from .base import BaseParser
 
 # This line defines the XMLParser class for handling XML (Extensible Markup Language)
 class XMLParser(BaseParser):
+    """Parser for .xml files."""
     
     # This line allows the XMLParser to accept a custom file size limit
     def __init__(self, max_file_size=None):
+        """Pass the optional file size limit up to BaseParser."""
         # This line calls the parent (BaseParser) constructor to set the limit
         super().__init__(max_file_size)
 

@@ -1,7 +1,14 @@
+# Program: json_schema_converter - engine.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Defines SchemaEngine, which feeds parsed data into GenSON to infer a JSON Schema, optionally marks every field required, and saves the result to disk.
+
 """
 Shared Core Engine with Type Safety and Robust Error Handling.
 """
 # This line imports standard libraries for JSON, Regex, and Logging
+# === Imports ===
+# Standard library modules first, then the third-party GenSON library.
 import json
 import re
 import logging
@@ -11,18 +18,23 @@ from typing import Any, Dict, List, Union, Optional
 from genson import SchemaBuilder
 
 # This line configures the logger for this file
+# === Logging setup ===
+# One logger per module, named after the module, so log lines show where they came from.
 logger = logging.getLogger(__name__)
 
 # This line defines a custom error for failures that happen during schema inference
 class InferenceError(Exception):
+    """Raised when schema inference or saving fails; wraps lower-level errors with a readable message."""
     # This line allows the error to carry a message
     pass
 
 # This line defines the main class that coordinates schema generation
 class SchemaEngine:
+    """Collects sample data and builds one JSON Schema from it (strict mode makes all fields required)."""
     # This method runs when a new SchemaEngine is created
     # Rationale: Using Type Hints (strict: bool) makes the code self-documenting for other devs
     def __init__(self, strict: bool = False):
+        """Create the GenSON builder and remember whether strict mode is on."""
         # This line creates a new instance of the SchemaBuilder
         self.builder = SchemaBuilder()
         # This line stores the strictness setting
@@ -54,7 +66,10 @@ class SchemaEngine:
             raise InferenceError(f"Error while feeding data to engine: {str(e)}")
 
     # This internal method looks for dates and emails to make the schema smarter
+    # Note: as the code stands, this method only walks through nested dicts and lists and
+    # returns the data; it does not actually detect dates or emails yet.
     def _apply_smart_patterns(self, data: Any) -> Any:
+        """Walk nested dicts/lists and return the data (currently no pattern detection is applied)."""
         # This block checks if we are looking at a dictionary
         if isinstance(data, dict):
             # This loop recursively processes every key and value
@@ -89,6 +104,7 @@ class SchemaEngine:
 
     # This recursive method forces every property to be 'required'
     def _make_required(self, schema: Dict[str, Any]) -> None:
+        """Recursively set "required" to every property name in objects, including nested objects and array items."""
         # This block checks if we are looking at an object type with properties
         if schema.get('type') == 'object' and 'properties' in schema:
             # This line sets the 'required' list to be all existing property names

@@ -1,3 +1,8 @@
+# Program: json_schema_converter - yaml_parser.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Defines YAMLParser, which safely loads a .yaml/.yml file into a Python dict or list after the size check.
+
 """
 YAML Parser Implementation.
 Rationale: YAML is a human-friendly superset of JSON. By using `yaml.safe_load`, 
@@ -11,9 +16,11 @@ from .base import BaseParser
 
 # This line defines the YAMLParser class for handling YAML (Yet Another Markup Language)
 class YAMLParser(BaseParser):
+    """Parser for .yaml and .yml files."""
     
     # This line allows the YAMLParser to accept a custom file size limit
     def __init__(self, max_file_size=None):
+        """Pass the optional file size limit up to BaseParser."""
         # This line calls the parent (BaseParser) constructor to set the limit
         super().__init__(max_file_size)
 

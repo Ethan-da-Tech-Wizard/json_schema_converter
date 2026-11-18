@@ -1,3 +1,8 @@
+# Program: json_schema_converter - test_engine.py
+# Programmer: Ethan-da-Tech-Wizard (written with Claude, an AI assistant)
+# Last Modified: 2026-11-18
+# Purpose: Pytest unit tests that check SchemaEngine infers object schemas and honors strict mode.
+
 """
 Enterprise-grade unit tests for the SchemaEngine.
 Rationale: Automated testing ensures that future changes don't break existing features.
@@ -9,6 +14,7 @@ from core.engine import SchemaEngine
 
 # This test verifies that the engine correctly identifies a basic object
 def test_basic_inference():
+    """Check the inferred schema is an object with the "id" and "name" properties."""
     # This line sets up the engine
     engine = SchemaEngine()
     # This line provides sample data
@@ -25,6 +31,7 @@ def test_basic_inference():
 
 # This test verifies that 'Strict Mode' correctly forces fields to be required
 def test_strict_mode():
+    """Check strict mode lists "id" in the schema's required fields."""
     # This line sets up the engine in strict mode
     engine = SchemaEngine(strict=True)
     data = {"id": 1}
