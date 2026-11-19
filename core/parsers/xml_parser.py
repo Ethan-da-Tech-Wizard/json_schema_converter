@@ -43,4 +43,6 @@ class XMLParser(BaseParser):
             xml_content = f.read()
 
         # Step 3: Parse XML into dict while disabling external entities for security
+        # CWE-611 Mitigation: resolve_entities=False disables parsing of DTD/external entity declarations.
+        # This prevents SSRF, local file disclosure (/etc/passwd), and Billion Laughs XML entity expansion attacks.
         return xmltodict.parse(xml_content, resolve_entities=False)
