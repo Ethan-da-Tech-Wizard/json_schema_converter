@@ -37,5 +37,7 @@ class YAMLParser(BaseParser):
         self.validate_file(file_path)
 
         # Step 2: Open and safely parse YAML content
+        # safe_load builds only plain Python types; unlike yaml.load it cannot
+        # instantiate arbitrary objects from tags in untrusted files.
         with open(file_path, 'r', encoding='utf-8') as f:
             return yaml.safe_load(f)

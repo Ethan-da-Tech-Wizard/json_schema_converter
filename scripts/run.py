@@ -15,8 +15,10 @@ import argparse
 from pathlib import Path
 
 # Add project root directory to sys.path to enable core imports
+# Lets `python scripts/run.py` import the `core` package without installing it.
 sys.path.append(str(Path(__file__).parent.parent))
 
+# Imports must come after the sys.path tweak above.
 from core.engine import SchemaEngine
 from core.parsers.json_parser import JSONParser
 from core.parsers.csv_parser import CSVParser
@@ -38,6 +40,7 @@ def main():
     # Step 2: Parse command-line arguments
     args = parser.parse_args()
     input_path = args.input
+    # The CLI takes megabytes; parsers take bytes. 0 stays 0 (unlimited).
     max_bytes = args.max_size * 1024 * 1024
     
     # Step 3: Validate input path existence
@@ -49,6 +52,8 @@ def main():
     engine = SchemaEngine(strict=args.strict)
     
     # Step 5: Configure parser registry mapped by file extension
+    # Extension -> parser registry. Lookup is by lowercase suffix, so adding a
+    # format means adding one entry here plus a BaseParser subclass.
     parsers = {
         '.json': JSONParser(max_file_size=max_bytes),
         '.csv': CSVParser(max_file_size=max_bytes),
@@ -61,6 +66,7 @@ def main():
     # Step 6: Handle batch directory processing or single-file processing
     if os.path.isdir(input_path):
         print(f"Batch Mode: Searching for files in {input_path}...")
+        # Batch mode is non-recursive: only regular files directly inside the folder.
         files = [os.path.join(input_path, f) for f in os.listdir(input_path) if os.path.isfile(os.path.join(input_path, f))]
         processed_count = 0
         
@@ -72,11 +78,14 @@ def main():
                     data = parsers[ext].parse(file)
                     engine.add_data(data)
                     processed_count += 1
+                # A bad file is skipped with a warning so one broken file does not abort the
+                # whole batch; its data is simply absent from the master schema.
                 except Exception as e:
                     print(f"Warning: Skipping {file} due to error: {e}")
         
         # Save aggregated master schema if files were processed
         if processed_count > 0:
+            # All processed files feed one engine, so this is a single merged schema.
             output_path = os.path.join(input_path, "master_schema.json")
             engine.save_schema(engine.get_schema(), output_path)
             print(f"Success! Master Schema created for {processed_count} files at: {output_path}")
@@ -96,6 +105,7 @@ def main():
             active_parser = parsers[ext]
             data = active_parser.parse(input_path)
             engine.add_data(data)
+            # Single-file output sits next to the input with ".schema.json" appended.
             output_path = f"{input_path}.schema.json"
             engine.save_schema(engine.get_schema(), output_path)
             print(f"Success! Schema created at: {output_path}")

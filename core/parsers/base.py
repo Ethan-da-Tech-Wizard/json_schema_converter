@@ -13,10 +13,13 @@ from abc import ABC, abstractmethod
 import os
 from typing import List, Any, Union, Dict
 
+# Raised before parsing when a file is too big, so oversized input is refused
+# instead of being loaded into memory.
 class SecurityError(Exception):
     """Custom exception raised when security or file size limits are violated."""
     pass
 
+# Wraps library-specific parse failures (pandas etc.) in one domain error.
 class ParsingError(Exception):
     """Custom exception raised when file parsing operations fail."""
     pass
@@ -37,6 +40,8 @@ class BaseParser(ABC):
             max_file_size (int, optional): Maximum allowed size in bytes (0 for unlimited).
         """
         # Assign configured threshold or default to 1GB
+        # None means "use the default"; 0 is a deliberate "no limit" and is therefore
+        # not treated as falsy here.
         self.max_file_size = max_file_size if max_file_size is not None else self.DEFAULT_MAX_SIZE
 
     def validate_file(self, file_path: str) -> None:
@@ -50,6 +55,7 @@ class BaseParser(ABC):
             SecurityError: If file exceeds maximum size threshold.
         """
         # Step 1: If safety limit is explicitly disabled (0), bypass check
+        # 0 disables the check entirely (CLI: --max-size 0).
         if self.max_file_size == 0:
             return
 
@@ -61,6 +67,8 @@ class BaseParser(ABC):
             size_mb = self.max_file_size / (1024 * 1024)
             raise SecurityError(f"File size exceeds {size_mb}MB safety limit. Size: {file_size} bytes")
 
+    # Subclasses return a dict (document formats) or list of dicts (tabular
+    # formats); SchemaEngine.add_data accepts either shape.
     @abstractmethod
     def parse(self, file_path: str) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """

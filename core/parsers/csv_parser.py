@@ -42,6 +42,8 @@ class CSVParser(BaseParser):
 
         try:
             # Step 2: Initialize chunked iterator to process rows incrementally
+            # chunksize bounds peak parsing memory to 10,000 rows at a time; the combined
+            # record list is still held in memory afterwards.
             reader = pd.read_csv(file_path, chunksize=10000)
             
             # Step 3: Stream and accumulate normalized records

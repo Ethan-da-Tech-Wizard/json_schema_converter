@@ -13,11 +13,14 @@ import json
 import re
 import logging
 from typing import Any, Dict, List, Union, Optional
+# GenSON does the actual inference: it merges many sample objects into one
+# JSON Schema. This module only prepares input and post-processes the result.
 from genson import SchemaBuilder
 
 # Configure module-level logger for schema inference diagnostics
 logger = logging.getLogger(__name__)
 
+# Single exception type so callers need not know about GenSON/IO internals.
 class InferenceError(Exception):
     """Custom exception raised when schema inference or serialization fails."""
     pass
@@ -37,6 +40,8 @@ class SchemaEngine:
                            marked as required in the generated schema.
         """
         # Step 1: Initialize underlying GenSON builder instance
+        # One builder accumulates every object added, so a batch (or a whole directory)
+        # produces a single merged schema.
         self.builder = SchemaBuilder()
         # Step 2: Store strictness flag governing required field enforcement
         self.strict = strict
@@ -78,8 +83,11 @@ class SchemaEngine:
         # Step 1: Handle dictionary structures recursively
         if isinstance(data, dict):
             for key, value in data.items():
+                # Mutates the caller's dict in place; the recursion currently returns values
+                # unchanged (a hook for future pattern detection), so behaviour is unaffected.
                 data[key] = self._apply_smart_patterns(value)
         # Step 2: Handle list structures recursively
+        # Lists are rebuilt (not mutated) from their processed items.
         elif isinstance(data, list):
             return [self._apply_smart_patterns(i) for i in data]
         return data
@@ -115,6 +123,8 @@ class SchemaEngine:
         """
         # Step 1: Handle object nodes containing defined properties
         if schema.get('type') == 'object' and 'properties' in schema:
+            # Strict mode: every property seen in the samples becomes required, even those
+            # that were absent in some records. Applied at every object level.
             schema['required'] = list(schema['properties'].keys())
             for prop in schema['properties'].values():
                 self._make_required(prop)
@@ -132,6 +142,7 @@ class SchemaEngine:
         """
         try:
             # Write pretty-printed JSON schema with 4-space indentation
+            # Overwrites an existing file at output_path without confirmation.
             with open(output_path, 'w') as f:
                 json.dump(schema, f, indent=4)
             logger.info(f"Schema successfully saved to {output_path}")

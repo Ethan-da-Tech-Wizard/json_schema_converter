@@ -7,6 +7,8 @@
 #          and strict mode required field enforcement.
 # ==============================================================================
 
+# These tests are pytest-style (plain asserts); unittest discovery will not run
+# them. They are offline and fast.
 import pytest
 from core.engine import SchemaEngine
 

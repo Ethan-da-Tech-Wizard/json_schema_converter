@@ -40,6 +40,7 @@ class ExcelParser(BaseParser):
         self.validate_file(file_path)
 
         # Step 2: Read first worksheet into a pandas DataFrame using openpyxl
+        # Only the first sheet is read (pandas default sheet_name=0).
         df = pd.read_excel(file_path, engine='openpyxl')
 
         # Step 3: Transform tabular rows into list of dictionaries
